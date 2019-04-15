@@ -6,6 +6,7 @@
 #include <tuple>
 #include "memory_struct.h"
 #include "march_tests.h"
+#include "fault.h"
 using namespace Memory;     
 void build_tests(std::string file_name, std::map<std::string,march::Test*>& test_map) {
     std::ifstream testfile (file_name);
@@ -109,7 +110,6 @@ void run_test(std::string _test_name, Memory::Memory_Array& Test_Mem) {
     auto test_order = test->march_order();
     auto test_element  = test->march_element();
     for(auto march_element : test_order) {
-        std::cout<<march_element.first<<std::endl;
         switch(march_element.second) {
             case INC : run_increasing(test_element[march_element.first],Test_Mem);
             case DEC : run_decreasing(test_element[march_element.first],Test_Mem);
@@ -117,6 +117,13 @@ void run_test(std::string _test_name, Memory::Memory_Array& Test_Mem) {
         }
     }
 }    
+
+void check_instance(uint32_t cell_under_test, Memory::Memory_Array& Test_Mem, Memory::fault mem_fault);
+    {
+        fau
+        
+    
+
           
 //int main() {
 //    std::string file_name = "march_tests.txt";
