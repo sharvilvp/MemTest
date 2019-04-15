@@ -1,0 +1,14 @@
+TEST MATS 
+    { M1 ANY { W1 R1 W0 R0 } }
+TEST MATS_PLUS
+    { M1 ANY { W0 } }
+    { M2 INC { R0 W1 } }
+    { M3 DEC { R1 W0 R0 } }
+TEST MARCHX 
+    { M1 ANY { W0 } }
+    { M2 INC { R0 W1 } }
+    { M3 INC { R1 W0 } }
+    { M4 DEC { R0 W1 } } 
+    { M5 DEC { R1 W0 } }
+    { M6 ANY { R0 } }
+ 
