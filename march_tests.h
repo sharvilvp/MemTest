@@ -24,7 +24,6 @@ namespace march {
         }
         
         march::Test& march_order(std::string _name, order_t _march_order) {
-            std::cout<<_name<<std::endl;
             march_order_map[_name] = _march_order;
             return *this;
         }

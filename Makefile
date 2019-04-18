@@ -2,14 +2,17 @@
 all : march 
 	@./march
 
-march : march_tests.o memory_struct.o main.o
-	g++ -Wall -Wextra -Weffc++ -Wpedantic -Werror -pedantic-errors  -o march main.o march_tests.o memory_struct.o -I.
+march : march_tests.o memory_struct.o coverage.o main.o
+	g++ -Wall -Wextra -Weffc++ -Wpedantic -Werror -pedantic-errors  -o march main.o coverage.o march_tests.o memory_struct.o -I.
 
 #%.o : %.h %.cpp
 #	g++ -o main.o  -I. -c main.cpp
 
 memory_struct.o : 
 	g++ -o memory_struct.o -I. -c memory_struct.cpp
+
+coverage.o :
+	g++ -o coverage.o -I. -c coverage.cpp
 
 #test_parser.o :
 #	g++ -o test_parser.o -I. -c test_parser.cpp	

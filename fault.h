@@ -1,6 +1,6 @@
 #ifndef _FAULT_H_
 #define _FAULT_H_ 
-#include<iostream>
+#include <iostream>
 #include "memory_defines.h" 
 #include "memory_struct.h"
 namespace Memory {
@@ -12,9 +12,10 @@ namespace Memory {
                 fault_list = _fault_list;
             }
             std::vector<fault_t> get_fault_list () {
-                return fault_list 
+                return fault_list; 
             }
-            void induce_fault(Memory::Memory_Array& Test_Mem, fault_t mem_fault) {
+                
+            void generate_fault_instances(std::vector<fault_t> fault_list,std::vector<Test_Mem> mem_list);  
                  
     };   
 }

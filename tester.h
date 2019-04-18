@@ -6,7 +6,7 @@
 #include <tuple>
 #include "memory_struct.h"
 #include "march_tests.h"
-#include "fault.h"
+//#include "fault.h"
 using namespace Memory;     
 void build_tests(std::string file_name, std::map<std::string,march::Test*>& test_map) {
     std::ifstream testfile (file_name);
@@ -74,56 +74,174 @@ void build_tests(std::string file_name, std::map<std::string,march::Test*>& test
        
  }
 
-void run_increasing(march_element_t element,Memory::Memory_Array& Test_Mem) {
-   for(uint32_t i=0;i<MEM_SIZE;i++) {
+bool run_increasing(march_element_t element,Memory::Memory_Array& Test_Mem,std::vector<int>& result_vec) {
+    for(uint32_t i=0;i<MEM_SIZE;i++) {
         for(auto t_op : element) {
             auto op = std::get<0>(t_op); 
             auto val = std::get<1>(t_op);
             if(op == W) 
                 Test_Mem.write_mem(i,val);
-            if(op == R)
+            if(op == R) {
                 auto read_val = Test_Mem.read_mem(i);
+                if(read_val != val) { 
+                    return false;
+                }
+            }
 
         }
     }
+    return true;
 }
 
-void run_decreasing(march_element_t element,Memory::Memory_Array& Test_Mem) {
-   for(uint32_t i=MEM_SIZE-1;i>0;i--) {
+bool run_decreasing(march_element_t element,Memory::Memory_Array& Test_Mem,std::vector<int>& result_vec) {
+   for(int i=MEM_SIZE-1;i>=0;i--) {
         for(auto t_op : element) {
             auto op = std::get<0>(t_op); 
             auto val = std::get<1>(t_op);
             if(op == W) 
                 Test_Mem.write_mem(i,val);
-            if(op == R)
+            if(op == R) {
                 auto read_val = Test_Mem.read_mem(i);
+                if(read_val != val) {
+                    return false;
+                }
+            }   
 
         }
     }
+    return true;
 }
 
-void run_test(std::string _test_name, Memory::Memory_Array& Test_Mem) {
+bool run_test(std::string _test_name, Memory::Memory_Array& Test_Mem) {
     march::Test* test;
     test = march::Test::getTest(_test_name); 
     assert(test != nullptr);
-    std::cout<<"Running Test "<<test->name()<<std::endl;
     auto test_order = test->march_order();
-    auto test_element  = test->march_element();
+    auto test_element  = test->march_element(); 
+    std::vector<int> result_vec;
+    bool result;
     for(auto march_element : test_order) {
         switch(march_element.second) {
-            case INC : run_increasing(test_element[march_element.first],Test_Mem);
-            case DEC : run_decreasing(test_element[march_element.first],Test_Mem);
-            case ANY : run_increasing(test_element[march_element.first],Test_Mem);
+            case INC : result = run_increasing(test_element[march_element.first],Test_Mem,result_vec); 
+                       break;
+            case DEC : result = run_decreasing(test_element[march_element.first],Test_Mem,result_vec); 
+                       break;
+            case ANY : result = run_increasing(test_element[march_element.first],Test_Mem,result_vec); 
+                       break;
+        }
+        if(result == false) {
+            return false;
+        }
+    }
+    return true;
+    //test->print_march_map();
+}    
+
+void generate_single_cell_faults(std::vector<fault_t> fault_list,std::map<std::string,Memory::Memory_Array>& instance_map) {
+    std::string instance_name;
+    for(auto fault : fault_list) {
+        for(int i=0;i<MEM_SIZE;i++) {
+            Memory::Memory_Array Test_Mem;
+            switch(fault) {
+                case SA0 : Test_Mem.inject_stuck_at_fault(i,0);
+                           instance_name = "SA0" + std::to_string(i);
+                           instance_map[instance_name] = Test_Mem;
+                           break;
+                case SA1 : Test_Mem.inject_stuck_at_fault(i,1);
+                           instance_name = "SA1" + std::to_string(i);
+                           instance_map[instance_name] = Test_Mem;
+                           break;
+                case TFLH : Test_Mem.inject_stuck_at_fault(i,low2high);
+                            instance_name = "TFLH" + std::to_string(i);
+                           instance_map[instance_name] = Test_Mem;
+                           break;
+                case TFHL : Test_Mem.inject_transition_fault(i,high2low);
+                            instance_name = "TFHL" + std::to_string(i);
+                           instance_map[instance_name] = Test_Mem;
+                           break;
+            }
+        }
+    }
+}
+
+void rotate_left(std::vector<int>& address_list) {
+       int temp = address_list[0];
+       int i;
+       for(i=0;i<address_list.size()-1;i++) 
+           address_list[i] = address_list[i+1];
+       address_list[i] = temp;
+}
+void generate_coupled_faults(std::vector<fault_t> fault_list, std::map<std::string,Memory::Memory_Array>& instance_map) {
+    std::string instance_name;
+    std::vector<int> agg_vic_list;
+
+    for(int i=0;i<MEM_SIZE;i++) {
+        agg_vic_list.push_back(i);
+    }
+
+     
+    for(auto fault : fault_list) {
+        switch(fault) {
+            case CFINLH : for(int i=0;i<MEM_SIZE;i++) {
+                            Memory::Memory_Array Test_Mem;
+                            Test_Mem.inject_inversion_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],low2high);
+                            instance_name = "CFINLHV" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+                            instance_map[instance_name] = Test_Mem;
+                            rotate_left(agg_vic_list);
+                          } 
+                          break;
+            case CFINHL : for(int i=0;i<MEM_SIZE;i++) {
+                            Memory::Memory_Array Test_Mem;
+                            Test_Mem.inject_inversion_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],high2low);
+                            instance_name = "CFINHLV" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+                            instance_map[instance_name] = Test_Mem;
+                            rotate_left(agg_vic_list);
+                          }
+                          break; 
+            case CFIDLH0 : for(int i=0;i<MEM_SIZE;i++) {
+                            Memory::Memory_Array Test_Mem;
+                            Test_Mem.inject_idempotent_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],low2high,0);
+                            instance_name = "CFIDLH0V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+                            instance_map[instance_name] = Test_Mem;
+                            rotate_left(agg_vic_list);
+                          }
+                          break; 
+            case CFIDLH1 : for(int i=0;i<MEM_SIZE;i++) {
+                            Memory::Memory_Array Test_Mem;
+                            Test_Mem.inject_idempotent_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],low2high,1);
+                            instance_name = "CFIDLH1V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+                            instance_map[instance_name] = Test_Mem;
+                            rotate_left(agg_vic_list);
+                          }
+                          break; 
+            case CFIDHL0 : for(int i=0;i<MEM_SIZE;i++) {
+                            Memory::Memory_Array Test_Mem;
+                            Test_Mem.inject_idempotent_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],high2low,0);
+                            instance_name = "CFIDHL0V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+                            instance_map[instance_name] = Test_Mem;
+                            rotate_left(agg_vic_list);
+                          }
+                          break; 
+            case CFIDHL1 : for(int i=0;i<MEM_SIZE;i++) {
+                            Memory::Memory_Array Test_Mem;
+                            Test_Mem.inject_idempotent_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],high2low,1);
+                            instance_name = "CFIDHL1V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+                            instance_map[instance_name] = Test_Mem;
+                            rotate_left(agg_vic_list);
+                          }
+                          break; 
+            case CFST00 : for(int i=0;i<MEM_SIZE;i++) {
+                            Memory::Memory_Array Test_Mem;
+                            Test_Mem.inject_state_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],0,1);
+                            instance_name = "CFST00V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+                            instance_map[instance_name] = Test_Mem;
+                            rotate_left(agg_vic_list);
+                          }
+                          break; 
+            
         }
     }
 }    
-
-void check_instance(uint32_t cell_under_test, Memory::Memory_Array& Test_Mem, Memory::fault mem_fault);
-    {
-        fau
-        
-    
-
           
 //int main() {
 //    std::string file_name = "march_tests.txt";

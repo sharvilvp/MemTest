@@ -82,6 +82,8 @@ class Memory_Array {
             dist_vic_value(2) {}
 
         ~Memory_Array() {}
+
+        std::string mem_name;
         
         //Basic reading and writing to memory
         uint32_t read_mem(uint32_t address);
