@@ -232,12 +232,35 @@ void generate_coupled_faults(std::vector<fault_t> fault_list, std::map<std::stri
                           break; 
             case CFST00 : for(int i=0;i<MEM_SIZE;i++) {
                             Memory::Memory_Array Test_Mem;
-                            Test_Mem.inject_state_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],0,1);
+                            Test_Mem.inject_state_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],0,0);
                             instance_name = "CFST00V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
                             instance_map[instance_name] = Test_Mem;
                             rotate_left(agg_vic_list);
                           }
                           break; 
+            case CFST01 : for(int i=0;i<MEM_SIZE;i++) {
+                            Memory::Memory_Array Test_Mem;
+                            Test_Mem.inject_state_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],0,1);
+                            instance_name = "CFST01V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+                            instance_map[instance_name] = Test_Mem;
+                            rotate_left(agg_vic_list);
+                          }
+                          break; 
+            case CFST10 : for(int i=0;i<MEM_SIZE;i++) {
+                            Memory::Memory_Array Test_Mem;
+                            Test_Mem.inject_state_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],1,0);
+                            instance_name = "CFST10V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+                            instance_map[instance_name] = Test_Mem;
+                            rotate_left(agg_vic_list);
+                          }
+                          break; 
+            case CFST11 : for(int i=0;i<MEM_SIZE;i++) {
+                            Memory::Memory_Array Test_Mem;
+                            Test_Mem.inject_state_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],1,1);
+                            instance_name = "CFST11V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+                            instance_map[instance_name] = Test_Mem;
+                            rotate_left(agg_vic_list);
+                          }
             
         }
     }

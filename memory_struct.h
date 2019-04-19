@@ -80,7 +80,7 @@ class Memory_Array {
             dist_victim(MEM_SIZE),
             dist_agg_op(NOP),
             dist_vic_value(2) {}
-
+            
         ~Memory_Array() {}
 
         std::string mem_name;

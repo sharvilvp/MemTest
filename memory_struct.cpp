@@ -31,7 +31,7 @@ void Memory_Cell::write_cell(uint32_t _value) {
         value = 1; return; }
 
     //else remember the transition
-    mem_op = W;
+        mem_op = W;
     if((value == 0 && value != 2) && _value == 1) 
         prev_trans = low2high;
     else if((value == 1 && value != 2) && _value == 0) 
