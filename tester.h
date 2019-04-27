@@ -75,7 +75,7 @@ void build_tests(std::string file_name, std::map<std::string,march::Test*>& test
  }
 
 bool run_increasing(march_element_t element,Memory::Memory_Array& Test_Mem,std::vector<int>& result_vec) {
-    for(uint32_t i=0;i<MEM_SIZE;i++) {
+    for(uint32_t i=0;i<Test_Mem.mem_size;i++) {
         for(auto t_op : element) {
             auto op = std::get<0>(t_op); 
             auto val = std::get<1>(t_op);
@@ -94,7 +94,7 @@ bool run_increasing(march_element_t element,Memory::Memory_Array& Test_Mem,std::
 }
 
 bool run_decreasing(march_element_t element,Memory::Memory_Array& Test_Mem,std::vector<int>& result_vec) {
-   for(int i=MEM_SIZE-1;i>=0;i--) {
+   for(int i=Test_Mem.mem_size-1;i>=0;i--) {
         for(auto t_op : element) {
             auto op = std::get<0>(t_op); 
             auto val = std::get<1>(t_op);
@@ -137,11 +137,11 @@ bool run_test(std::string _test_name, Memory::Memory_Array& Test_Mem) {
     //test->print_march_map();
 }    
 
-void generate_single_cell_faults(std::vector<fault_t> fault_list,std::map<std::string,Memory::Memory_Array>& instance_map) {
+void generate_single_cell_faults(std::vector<fault_t> fault_list,std::map<std::string,Memory::Memory_Array>& instance_map,uint32_t mem_size) {
     std::string instance_name;
     for(auto fault : fault_list) {
-        for(int i=0;i<MEM_SIZE;i++) {
-            Memory::Memory_Array Test_Mem;
+        for(int i=0;i<mem_size;i++) {
+            Memory::Memory_Array Test_Mem(mem_size);
             switch(fault) {
                 case SA0 : Test_Mem.inject_stuck_at_fault(i,0);
                            instance_name = "SA0" + std::to_string(i);
@@ -171,93 +171,93 @@ void rotate_left(std::vector<int>& address_list) {
            address_list[i] = address_list[i+1];
        address_list[i] = temp;
 }
-void generate_coupled_faults(std::vector<fault_t> fault_list, std::map<std::string,Memory::Memory_Array>& instance_map) {
+void generate_coupled_faults(std::vector<fault_t> fault_list, std::map<std::string,Memory::Memory_Array>& instance_map,uint32_t mem_size) {
     std::string instance_name;
     std::vector<int> agg_vic_list;
 
-    for(int i=0;i<MEM_SIZE;i++) {
+    for(int i=0;i<mem_size;i++) {
         agg_vic_list.push_back(i);
     }
 
      
     for(auto fault : fault_list) {
         switch(fault) {
-            case CFINLH : for(int i=0;i<MEM_SIZE;i++) {
-                            Memory::Memory_Array Test_Mem;
-                            Test_Mem.inject_inversion_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],low2high);
-                            instance_name = "CFINLHV" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+            case CFINLH : for(int i=0;i<mem_size;i++) {
+                            Memory::Memory_Array Test_Mem(mem_size);
+                            Test_Mem.inject_inversion_fault(agg_vic_list[0],agg_vic_list[mem_size-1],low2high);
+                            instance_name = "CFINLHV" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[mem_size-1]);
                             instance_map[instance_name] = Test_Mem;
                             rotate_left(agg_vic_list);
                           } 
                           break;
-            case CFINHL : for(int i=0;i<MEM_SIZE;i++) {
-                            Memory::Memory_Array Test_Mem;
-                            Test_Mem.inject_inversion_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],high2low);
-                            instance_name = "CFINHLV" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+            case CFINHL : for(int i=0;i<mem_size;i++) {
+                            Memory::Memory_Array Test_Mem(mem_size);
+                            Test_Mem.inject_inversion_fault(agg_vic_list[0],agg_vic_list[mem_size-1],high2low);
+                            instance_name = "CFINHLV" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[mem_size-1]);
                             instance_map[instance_name] = Test_Mem;
                             rotate_left(agg_vic_list);
                           }
                           break; 
-            case CFIDLH0 : for(int i=0;i<MEM_SIZE;i++) {
-                            Memory::Memory_Array Test_Mem;
-                            Test_Mem.inject_idempotent_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],low2high,0);
-                            instance_name = "CFIDLH0V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+            case CFIDLH0 : for(int i=0;i<mem_size;i++) {
+                            Memory::Memory_Array Test_Mem(mem_size);
+                            Test_Mem.inject_idempotent_fault(agg_vic_list[0],agg_vic_list[mem_size-1],low2high,0);
+                            instance_name = "CFIDLH0V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[mem_size-1]);
                             instance_map[instance_name] = Test_Mem;
                             rotate_left(agg_vic_list);
                           }
                           break; 
-            case CFIDLH1 : for(int i=0;i<MEM_SIZE;i++) {
-                            Memory::Memory_Array Test_Mem;
-                            Test_Mem.inject_idempotent_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],low2high,1);
-                            instance_name = "CFIDLH1V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+            case CFIDLH1 : for(int i=0;i<mem_size;i++) {
+                            Memory::Memory_Array Test_Mem(mem_size);
+                            Test_Mem.inject_idempotent_fault(agg_vic_list[0],agg_vic_list[mem_size-1],low2high,1);
+                            instance_name = "CFIDLH1V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[mem_size-1]);
                             instance_map[instance_name] = Test_Mem;
                             rotate_left(agg_vic_list);
                           }
                           break; 
-            case CFIDHL0 : for(int i=0;i<MEM_SIZE;i++) {
-                            Memory::Memory_Array Test_Mem;
-                            Test_Mem.inject_idempotent_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],high2low,0);
-                            instance_name = "CFIDHL0V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+            case CFIDHL0 : for(int i=0;i<mem_size;i++) {
+                            Memory::Memory_Array Test_Mem(mem_size);
+                            Test_Mem.inject_idempotent_fault(agg_vic_list[0],agg_vic_list[mem_size-1],high2low,0);
+                            instance_name = "CFIDHL0V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[mem_size-1]);
                             instance_map[instance_name] = Test_Mem;
                             rotate_left(agg_vic_list);
                           }
                           break; 
-            case CFIDHL1 : for(int i=0;i<MEM_SIZE;i++) {
-                            Memory::Memory_Array Test_Mem;
-                            Test_Mem.inject_idempotent_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],high2low,1);
-                            instance_name = "CFIDHL1V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+            case CFIDHL1 : for(int i=0;i<mem_size;i++) {
+                            Memory::Memory_Array Test_Mem(mem_size);
+                            Test_Mem.inject_idempotent_fault(agg_vic_list[0],agg_vic_list[mem_size-1],high2low,1);
+                            instance_name = "CFIDHL1V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[mem_size-1]);
                             instance_map[instance_name] = Test_Mem;
                             rotate_left(agg_vic_list);
                           }
                           break; 
-            case CFST00 : for(int i=0;i<MEM_SIZE;i++) {
-                            Memory::Memory_Array Test_Mem;
-                            Test_Mem.inject_state_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],0,0);
-                            instance_name = "CFST00V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+            case CFST00 : for(int i=0;i<mem_size;i++) {
+                            Memory::Memory_Array Test_Mem(mem_size);
+                            Test_Mem.inject_state_fault(agg_vic_list[0],agg_vic_list[mem_size-1],0,0);
+                            instance_name = "CFST00V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[mem_size-1]);
                             instance_map[instance_name] = Test_Mem;
                             rotate_left(agg_vic_list);
                           }
                           break; 
-            case CFST01 : for(int i=0;i<MEM_SIZE;i++) {
-                            Memory::Memory_Array Test_Mem;
-                            Test_Mem.inject_state_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],0,1);
-                            instance_name = "CFST01V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+            case CFST01 : for(int i=0;i<mem_size;i++) {
+                            Memory::Memory_Array Test_Mem(mem_size);
+                            Test_Mem.inject_state_fault(agg_vic_list[0],agg_vic_list[mem_size-1],0,1);
+                            instance_name = "CFST01V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[mem_size-1]);
                             instance_map[instance_name] = Test_Mem;
                             rotate_left(agg_vic_list);
                           }
                           break; 
-            case CFST10 : for(int i=0;i<MEM_SIZE;i++) {
-                            Memory::Memory_Array Test_Mem;
-                            Test_Mem.inject_state_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],1,0);
-                            instance_name = "CFST10V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+            case CFST10 : for(int i=0;i<mem_size;i++) {
+                            Memory::Memory_Array Test_Mem(mem_size);
+                            Test_Mem.inject_state_fault(agg_vic_list[0],agg_vic_list[mem_size-1],1,0);
+                            instance_name = "CFST10V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[mem_size-1]);
                             instance_map[instance_name] = Test_Mem;
                             rotate_left(agg_vic_list);
                           }
                           break; 
-            case CFST11 : for(int i=0;i<MEM_SIZE;i++) {
-                            Memory::Memory_Array Test_Mem;
-                            Test_Mem.inject_state_fault(agg_vic_list[0],agg_vic_list[MEM_SIZE-1],1,1);
-                            instance_name = "CFST11V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[MEM_SIZE-1]);
+            case CFST11 : for(int i=0;i<mem_size;i++) {
+                            Memory::Memory_Array Test_Mem(mem_size);
+                            Test_Mem.inject_state_fault(agg_vic_list[0],agg_vic_list[mem_size-1],1,1);
+                            instance_name = "CFST11V" + std::to_string(agg_vic_list[0]) + "A" + std::to_string(agg_vic_list[mem_size-1]);
                             instance_map[instance_name] = Test_Mem;
                             rotate_left(agg_vic_list);
                           }

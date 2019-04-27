@@ -40,6 +40,7 @@ void Memory_Cell::write_cell(uint32_t _value) {
     value = _value;
     return;
 }
+
 //FIXME:find a way to get rid of this | redundant.
 uint32_t Memory_Cell::cell_value() {
     return value; }
@@ -134,7 +135,7 @@ void Memory_Array::inject_disturb_fault(uint32_t victim, uint32_t aggressor, op_
 } 
 
 void Memory_Array::print_mem_array() {
-    for(uint32_t i=0;i<MEM_SIZE;i++) {
+    for(uint32_t i=0;i<mem_size;i++) {
         std::cout<<Mem_Arr[i].cell_value()<<std::endl;
     }
 }

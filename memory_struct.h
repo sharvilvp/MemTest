@@ -34,7 +34,7 @@ class Memory_Cell {
 //Class memory array having a has-a relationship with memory cell
 class Memory_Array {
     private :
-        Memory_Cell Mem_Arr[MEM_SIZE];
+        Memory_Cell* Mem_Arr;
         std::map<uint32_t,std::string> fault_map = {};        
         
         //Inversion fault parameters
@@ -64,7 +64,8 @@ class Memory_Array {
         //Constructors/Destructors for memory array
         //Initialiazing all parameters to Max Address as memory has
         //address range 0 - MEM_SIZE
-        Memory_Array() :
+       
+        Memory_Array(uint32_t MEM_SIZE=8) :
             inv_aggressor(MEM_SIZE),
             inv_victim(MEM_SIZE),
             inv_tran_value(no_tran),
@@ -79,11 +80,15 @@ class Memory_Array {
             dist_aggressor(MEM_SIZE),
             dist_victim(MEM_SIZE),
             dist_agg_op(NOP),
-            dist_vic_value(2) {}
+            dist_vic_value(2) {
+            Mem_Arr = new Memory_Cell[MEM_SIZE];
+            mem_size = MEM_SIZE;
+            }
             
         ~Memory_Array() {}
 
         std::string mem_name;
+        uint32_t mem_size;
         
         //Basic reading and writing to memory
         uint32_t read_mem(uint32_t address);

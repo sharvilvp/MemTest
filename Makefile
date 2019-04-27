@@ -1,6 +1,6 @@
 
 all : march 
-	@./march
+	@./march $(TEST_ARGS)
 
 march : march_tests.o memory_struct.o coverage.o main.o
 	g++ $(CLFAGS) -Wall -Wextra -Weffc++ -Wpedantic -Werror -pedantic-errors  -o march main.o coverage.o march_tests.o memory_struct.o -I.
